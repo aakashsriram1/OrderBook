@@ -5,6 +5,7 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <atomic> // Ensure atomic is included
 
 #include "Usings.h"
 #include "Order.h"
@@ -35,15 +36,17 @@ private:
         };
     };
 
+    // Data members
     std::unordered_map<Price, LevelData> data_;
-    std::map<Price, OrderPointers, std::greater<Price>> bids_;
-    std::map<Price, OrderPointers, std::less<Price>> asks_;
-    std::unordered_map<OrderId, OrderEntry> orders_;
-    mutable std::mutex ordersMutex_;
-    std::thread ordersPruneThread_;
-    std::condition_variable shutdownConditionVariable_;
-    std::atomic<bool> shutdown_{ false };
+    std::map<Price, OrderPointers, std::greater<Price>> bids_; // Buy side
+    std::map<Price, OrderPointers, std::less<Price>> asks_;    // Sell side
+    std::unordered_map<OrderId, OrderEntry> orders_; // All orders
+    mutable std::mutex ordersMutex_; // Mutex for thread safety
+    std::thread ordersPruneThread_; // Background pruning thread
+    std::condition_variable shutdownConditionVariable_; // Shutdown signal
+    std::atomic<bool> shutdown_{ false }; // Atomic flag for shutdown
 
+    // Private helper methods
     void PruneGoodForDayOrders();
 
     void CancelOrders(OrderIds orderIds);
@@ -60,13 +63,17 @@ private:
 
 public:
 
+    // Constructor and Destructor
     Orderbook();
+    ~Orderbook();
+
+    // Deleted constructors and assignment operators
     Orderbook(const Orderbook&) = delete;
     void operator=(const Orderbook&) = delete;
     Orderbook(Orderbook&&) = delete;
     void operator=(Orderbook&&) = delete;
-    ~Orderbook();
 
+    // Public methods
     Trades AddOrder(OrderPointer order);
     void CancelOrder(OrderId orderId);
     Trades ModifyOrder(OrderModify order);
