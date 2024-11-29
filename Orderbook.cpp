@@ -14,7 +14,7 @@ void Orderbook::PruneGoodForDayOrders()
         const auto now = system_clock::now();
         const auto now_c = system_clock::to_time_t(now);
         std::tm now_parts;
-        localtime_r(&now_c, &now_parts); // Use localtime_r for macOS compatibility
+        localtime_r(&now_c, &now_parts); 
 
         if (now_parts.tm_hour >= end.count())
             now_parts.tm_mday += 1;
@@ -39,9 +39,9 @@ void Orderbook::PruneGoodForDayOrders()
         {
             std::scoped_lock ordersLock{ ordersMutex_ };
 
-            for (const auto& [key, entry] : orders_) // Rename `_` to `key`
+            for (const auto& [key, entry] : orders_) 
             {
-                const auto& [order, location] = entry; // Rename `_` to `location`
+                const auto& [order, location] = entry; 
 
                 if (order->GetOrderType() != OrderType::GoodForDay)
                     continue;
@@ -64,7 +64,7 @@ void Orderbook::CancelOrders(OrderIds orderIds)
 
 void Orderbook::CancelOrderInternal(OrderId orderId)
 {
-    if (orders_.find(orderId) == orders_.end()) // Replace contains with find
+    if (orders_.find(orderId) == orders_.end()) 
         return;
 
     const auto [order, iterator] = orders_.at(orderId);
